@@ -5,7 +5,7 @@ import concurrent.futures
 
 st.set_page_config(page_title="NSE Stocks Scanner", layout="wide")
 st.title("NSE Stocks Scanner")
-st.sidebar.title("First select interval daily Choose max 5 stocks than select interval 5 min or 15 min")  
+st.write("First select interval daily Choose max 5 stocks than select interval 5 min or 15 min")  
 
 # Initialize TvDatafeed in guest mode
 @st.cache_resource
@@ -112,4 +112,5 @@ if st.button("Scan Symbols"):
         st.dataframe(df_results)
     else:
         st.warning("No signals found.")
+
 
