@@ -35,6 +35,15 @@ else:
 # Display n_bars as a fixed text input (read-only, no +/- buttons)
 st.text_input("Number of Bars", value=str(n_bars), disabled=True)
 
+# Stock selection logic
+if interval_selection in ["5 Minute", "15 Minute"]:
+    selected_symbols = st.multiselect("Select Stocks (Max 5)", symbols, max_selections=5)
+    if not selected_symbols:
+        st.warning("Please select at least one stock to scan.")
+else:
+    st.info(f"Scanning all {len(symbols)} stocks for Daily interval.")
+    selected_symbols = symbols
+
 def process_symbol(symbol, interval, n_bars):
     try:
         data = tv.get_hist(symbol=symbol,exchange='NSE',interval=interval,n_bars=n_bars)  
@@ -65,6 +74,10 @@ def process_symbol(symbol, interval, n_bars):
     return None
 
 if st.button("Scan Symbols"):
+    if not selected_symbols:
+        st.error("No stocks selected!")
+        st.stop()
+
     results = []
     progress_bar = st.progress(0)
     status_text = st.empty()
@@ -74,10 +87,10 @@ if st.button("Scan Symbols"):
     # Use ThreadPoolExecutor for parallel execution
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         # Submit all tasks
-        future_to_symbol = {executor.submit(process_symbol, symbol, selected_interval, n_bars): symbol for symbol in symbols}
+        future_to_symbol = {executor.submit(process_symbol, symbol, selected_interval, n_bars): symbol for symbol in selected_symbols}
         
         completed_count = 0
-        total_symbols = len(symbols)
+        total_symbols = len(selected_symbols)
         
         for future in concurrent.futures.as_completed(future_to_symbol):
             result = future.result()
